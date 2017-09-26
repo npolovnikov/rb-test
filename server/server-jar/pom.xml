@@ -25,5 +25,4 @@
             <version>${parent.version}</version>
         </dependency>
     </dependencies>
-
 </project>

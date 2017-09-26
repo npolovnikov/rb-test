@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>server-jar</module>
         <module>server-api</module>
+        <module>server-jar</module>
     </modules>
 </project>

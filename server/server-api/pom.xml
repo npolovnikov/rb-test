@@ -12,6 +12,4 @@
 
     <artifactId>server-api</artifactId>
     <packaging>jar</packaging>
-
-
 </project>
