@@ -1,0 +1,60 @@
+﻿#common
+target/
+out/
+classes/
+syntax:glob
+*.swp
+git.properties
+target.db
+bootCounter.agent
+*.~sql
+*.jasper
+*.xml~
+*.bak
+*.releaseBackup
+~*
+.mvn/
+styles.scss.cache
+
+#IDEA Project Files
+*.iml
+*.iws
+.idea
+*.ipr
+ishopdb
+*.log
+atlassian-ide-plugin.xml
+
+# Eclipse Project Files
+.settings/
+.gwt/
+.project
+.classpath
+.metadata/
+.externalToolBuilders/
+gwt-unitCache/
+
+# Dolphin
+.directory
+
+# NetBeans Project Files
+nb-configuration.xml
+nbactions.xml
+
+# Office Documents temporary files
+~$*.doc
+~$*.docx
+~*.tmp
+
+# LibreOffice temporary Files
+.~lock.*#
+
+# TestNG
+test-output/
+build/
+
+# Кэш иконок
+.DS_Store
+
+# PMD Files
+*.pmd
