@@ -24,5 +24,10 @@
             <artifactId>client-api</artifactId>
             <version>${parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.realtimeboard</groupId>
+            <artifactId>common</artifactId>
+            <version>${parent.version}</version>
+        </dependency>
     </dependencies>
 </project>
