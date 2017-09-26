@@ -8,10 +8,30 @@
     <artifactId>rb-test</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+
     <modules>
         <module>server</module>
-        <module>client-jar</module>
+        <module>client</module>
     </modules>
 
+    <properties>
+        <java.version>1.8</java.version>
+        <project.encoding>UTF-8</project.encoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 
+    <repositories>
+        <repository>
+            <id>techinfocom</id>
+            <name>Techinfocom maven2 repo</name>
+            <url>scpexe://techinfocom.com/data/maven2</url>
+        </repository>
+    </repositories>
+
+    <scm>
+        <connection>scm:git:ssh://git@github.com:npolovnikov/rb-test.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:npolovnikov/rb-test.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
 </project>

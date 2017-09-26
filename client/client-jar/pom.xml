@@ -5,12 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>server</artifactId>
+        <artifactId>client</artifactId>
         <groupId>com.realtimeboard</groupId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>server-jar</artifactId>
+    <artifactId>client-jar</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -25,5 +25,4 @@
             <version>${parent.version}</version>
         </dependency>
     </dependencies>
-
 </project>
