@@ -18,35 +18,58 @@
             <groupId>com.realtimeboard</groupId>
             <artifactId>server-api</artifactId>
             <version>${parent.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.realtimeboard</groupId>
             <artifactId>client-api</artifactId>
             <version>${parent.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.realtimeboard</groupId>
             <artifactId>common</artifactId>
             <version>${parent.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
-                <!-- Build an executable JAR -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.0.2</version>
                 <configuration>
                     <archive>
+                        <index>true</index>
                         <manifest>
-                            <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
+                            <addClasspath>true</addClasspath>
                             <mainClass>com.rbtest.server.Server</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeScope>compile</includeScope>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>true</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

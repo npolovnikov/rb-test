@@ -15,7 +15,7 @@ public class ChatHistory implements Serializable {
     private List<Message> history;
 
     public ChatHistory() {
-        this.history = new ArrayList<Message>(Config.HISTORY_LENGTH);
+        this.history = new ArrayList<>(Config.HISTORY_LENGTH);
     }
 
     public void addMessage(Message message){
