@@ -52,6 +52,7 @@ nbactions.xml
 # TestNG
 test-output/
 build/
+jars
 
 # Кэш иконок
 .DS_Store

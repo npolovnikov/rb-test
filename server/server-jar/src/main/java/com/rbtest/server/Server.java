@@ -19,7 +19,7 @@ public class Server {
                 while (client == null) {
                     client = socketListener.accept();
                 }
-//                new ClientThread(client); //Создаем новый поток, которому передаем сокет
+                new ClientThread(client); //Создаем новый поток, которому передаем сокет
             }
         } catch (SocketException e) {
             System.err.println("Socket exception");

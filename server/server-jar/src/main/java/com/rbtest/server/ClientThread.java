@@ -3,6 +3,9 @@ package com.rbtest.server;
 import com.rbtest.common.Message;
 import com.rbtest.common.Ping;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -58,34 +61,31 @@ public class ClientThread extends Thread {
             getUserList().addUser(login, socket, outputStream, inputStream);
 
             //Для ответа, указываем список доступных пользователей
-            this.c.setOnlineUsers(getUserList().getUsers());
+            this.c.setAddress(getUserList().getUsers());
 
             //Передаем всем сообщение пользователя
             this.broadcast(getUserList().getClientsList(), this.c);
 
             //Запускаем таймер
-            this.timer = new Timer(DELAY, new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try { //Если количество входящих пакетов от клиента рано исходящему, значит клиент еще не в ауте
-                        if (inPacks == outPacks) {
-                            outputStream.writeObject(new Ping());
-                            outPacks++;
-                            System.out.println(outPacks + " out");
-                        } else { //Иначе, в ауте
-                            throw new SocketException();
-                        }
-                    } catch (SocketException ex1) {
-                        System.out.println("packages not clash");
-                        System.out.println(login + " disconnected!");
-                        //Удаляем клиента из списка доступных и информируем всех
-                        getUserList().deleteUser(login);
-                        broadcast(getUserList().getClientsList(), new Message("Server-Bot", "The user " + login + " has been disconnect", getUserList().getUsers()));
-                        flag = true;
-                        timer.stop();
-                    } catch (IOException ex2) {
-                        ex2.printStackTrace();
+            this.timer = new Timer(DELAY, e -> {
+                try { //Если количество входящих пакетов от клиента рано исходящему, значит клиент еще не в ауте
+                    if (inPacks == outPacks) {
+                        outputStream.writeObject(new Ping());
+                        outPacks++;
+                        System.out.println(outPacks + " out");
+                    } else { //Иначе, в ауте
+                        throw new SocketException();
                     }
+                } catch (SocketException ex1) {
+                    System.out.println("packages not clash");
+                    System.out.println(login + " disconnected!");
+                    //Удаляем клиента из списка доступных и информируем всех
+                    getUserList().deleteUser(login);
+                    broadcast(getUserList().getClientsList(), new Message("Server-Bot", getUserList().getUsers(),"The user " + login + " has been disconnect"));
+                    flag = true;
+                    timer.stop();
+                } catch (IOException ex2) {
+                    ex2.printStackTrace();
                 }
             });
 
@@ -118,10 +118,10 @@ public class ClientThread extends Thread {
                     this.broadcast(getUserList().getClientsList(), new Message("Server-Bot", "The user " + login + " has been connect"));
                 }
 
-                this.c.setOnlineUsers(getUserList().getUsers());
+                this.c.setAddress((getUserList().getUsers()));
 
                 if (!(c instanceof Ping) && !c.getMessage().equals(Config.HELLO_MESSAGE)) {
-                    System.out.println("Send broadcast com.rbtest.common.Message: "" + c.getMessage() + """);
+                    System.out.println("Send broadcast com.rbtest.common.Message: " + c.getMessage());
                     this.broadcast(getUserList().getClientsList(), this.c);
                 }
             }
@@ -130,9 +130,7 @@ public class ClientThread extends Thread {
             System.out.println(login + " disconnected!");
             this.broadcast(getUserList().getClientsList(), new Message("Server-Bot",  getUserList().getUsers(), "The user " + login + " has been disconnect"));
             this.timer.stop();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
