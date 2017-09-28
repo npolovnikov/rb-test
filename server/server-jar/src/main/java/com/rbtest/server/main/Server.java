@@ -2,6 +2,8 @@ package com.rbtest.server.main;
 
 import com.rbtest.server.ChatHistory;
 import com.rbtest.server.UsersList;
+import com.rbtest.server.client.SocketClient;
+import com.rbtest.server.client.SocketClientThread;
 import com.rbtest.server.connections.ServerConnection;
 import com.rbtest.server.connections.ServerSocketConnection;
 
@@ -16,20 +18,32 @@ public class Server {
 
     public Server() {
         try {
-            final ServerConnection connection = new ServerSocketConnection();
+            final ServerSocketConnection connection = new ServerSocketConnection();//
             usersList = new UsersList();
             chatHistory = new ChatHistory();
 
-            ScheduledExecutorService listener = Executors.newSingleThreadScheduledExecutor();
+            final ScheduledExecutorService listener = Executors.newSingleThreadScheduledExecutor();
 
-            listener.scheduleAtFixedRate(connection::findNewClient, 1, 1, TimeUnit.MILLISECONDS);
-            while (!listener.isShutdown()){
+            listener.scheduleAtFixedRate(() -> {
+                SocketClient client = connection.findNewClient();
+                if (client != null) {
+                    startWorkWithClient(client);
+                }
+            }, 1, 1, TimeUnit.MILLISECONDS);
+
+            while (!listener.isShutdown()) {
                 Thread.sleep(100);
             }
         } catch (InterruptedException | IOException e) {
             System.err.println(e.getMessage());
             System.exit(1);
         }
+    }
+
+    private void startWorkWithClient(SocketClient client) {
+        final ScheduledExecutorService listener = Executors.newSingleThreadScheduledExecutor();
+
+        listener.scheduleAtFixedRate(() -> new SocketClientThread(client), 1, 1, TimeUnit.MILLISECONDS);
     }
 
     public synchronized static UsersList getUserList() {
