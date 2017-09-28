@@ -45,7 +45,7 @@
                         <manifest>
                             <classpathPrefix>lib/</classpathPrefix>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.rbtest.server.main.Server</mainClass>
+                            <mainClass>com.rbtest.server.main.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

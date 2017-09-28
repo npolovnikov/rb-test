@@ -1,4 +1,4 @@
-package com.rbtest.client;
+package com.rbtest.client.connections;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

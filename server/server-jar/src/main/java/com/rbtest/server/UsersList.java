@@ -1,6 +1,7 @@
 package com.rbtest.server;
 
 import com.rbtest.common.Auth;
+import com.rbtest.server.client.Client;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,7 +23,7 @@ public class UsersList {
         if (!this.onlineUsers.containsKey(login)) {
             this.onlineUsers.put(login , new Client(socket, oos, ois));
             try {
-                onlineUsers.get(login).getThisObjectOutputStream().writeObject(new Auth());
+                onlineUsers.get(login).getThisObjectOutputStream().writeObject(new Auth(login));
             } catch (IOException e) {
                 e.printStackTrace();
             }

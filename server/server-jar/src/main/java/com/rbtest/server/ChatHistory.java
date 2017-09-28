@@ -1,6 +1,7 @@
 package com.rbtest.server;
 
 import com.rbtest.common.Message;
+import com.rbtest.server.config.Config;
 
 import java.io.Serializable;
 import java.util.ArrayList;

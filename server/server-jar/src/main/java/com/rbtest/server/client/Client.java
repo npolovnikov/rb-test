@@ -1,4 +1,4 @@
-package com.rbtest.server;
+package com.rbtest.server.client;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

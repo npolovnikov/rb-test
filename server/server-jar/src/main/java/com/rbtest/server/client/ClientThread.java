@@ -1,8 +1,9 @@
-package com.rbtest.server;
+package com.rbtest.server.client;
 
 import com.rbtest.common.Auth;
 import com.rbtest.common.Message;
 import com.rbtest.common.Ping;
+import com.rbtest.server.config.Config;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -22,7 +23,6 @@ import static com.rbtest.server.main.Server.getUserList;
 public class ClientThread extends Thread {
     private final static int DELAY = 30000;
 
-    private Message c;
     private String login;
     private int inPacks = 0;
     private int outPacks = 0;
@@ -43,28 +43,34 @@ public class ClientThread extends Thread {
             final ObjectOutputStream outputStream = new ObjectOutputStream(this.socket.getOutputStream());
 
             //Читаем com.rbtest.common.Message из потока
-            this.c = (Message) inputStream.readObject();
+            Message c = (Message) inputStream.readObject();
 
             //Читаем логин отправителя
-            this.login = this.c.getLogin();
+            this.login = c.getLogin();
 
             //Что же нам прислали?
-            if (this.c instanceof Auth) {
-                outputStream.writeObject(new Auth());
-                outputStream.writeObject(getChatHistory());
+            if (c instanceof Auth) {
+                getUserList().addUser(login, socket, outputStream, inputStream);
+                getChatHistory().getHistory().forEach(message -> {
+                    try {
+                        outputStream.writeObject(message);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
                 this.broadcast(getUserList().getClientsList(), new Message("Server-Bot", "The user " + login + " has been connect")); //И сообщаем всем клиентам, что подключился новый пользователь
             } else {
-                System.out.println("[" + this.c.getLogin() + "]: " + this.c.getMessage());
-                getChatHistory().addMessage(this.c);
+                System.out.println("[" + c.getLogin() + "]: " + c.getMessage());
+                getChatHistory().addMessage(c);
             }
             //Добавляем к списку пользователей - нового
-            getUserList().addUser(login, socket, outputStream, inputStream);
+
 
             //Для ответа, указываем список доступных пользователей
-            this.c.setAddress(getUserList().getUsers());
+            c.setAddress(getUserList().getUsers());
 
             //Передаем всем сообщение пользователя
-            this.broadcast(getUserList().getClientsList(), this.c);
+            this.broadcast(getUserList().getClientsList(), c);
 
             //Запускаем таймер
             this.timer = new Timer(DELAY, e -> {
@@ -104,25 +110,25 @@ public class ClientThread extends Thread {
                     break;
                 }
                 //Принимаем сообщение
-                this.c = (Message) inputStream.readObject();
+                c = (Message) inputStream.readObject();
 
                 //Если это ping
-                if (this.c instanceof Ping) {
+                if (c instanceof Ping) {
                     this.inPacks++;
                     System.out.println(this.inPacks + " in");
                 } else if (!c.getMessage().equals(Config.HELLO_MESSAGE)) {
                     System.out.println("[" + login + "]: " + c.getMessage());
-                    getChatHistory().addMessage(this.c);
+                    getChatHistory().addMessage(c);
                 } else {
                     outputStream.writeObject(getChatHistory());
                     this.broadcast(getUserList().getClientsList(), new Message("Server-Bot", "The user " + login + " has been connect"));
                 }
 
-                this.c.setAddress((getUserList().getUsers()));
+                c.setAddress((getUserList().getUsers()));
 
                 if (!(c instanceof Ping) && !c.getMessage().equals(Config.HELLO_MESSAGE)) {
                     System.out.println("Send broadcast com.rbtest.common.Message: " + c.getMessage());
-                    this.broadcast(getUserList().getClientsList(), this.c);
+                    this.broadcast(getUserList().getClientsList(), c);
                 }
             }
 

@@ -1,6 +1,6 @@
 package com.rbtest.server.main;
 
-import com.rbtest.server.Config;
+import com.rbtest.server.config.Config;
 
 /**
  * Created by npolovnikov on 28.09.17.

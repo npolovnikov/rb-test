@@ -1,43 +1,39 @@
 package com.rbtest.server.main;
 
 import com.rbtest.server.ChatHistory;
-import com.rbtest.server.ClientThread;
-import com.rbtest.server.Config;
 import com.rbtest.server.UsersList;
+import com.rbtest.server.connections.ServerConnection;
+import com.rbtest.server.connections.ServerSocketConnection;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Server {
-    private static UsersList list = new UsersList();
+    private static UsersList usersList;
     private static ChatHistory chatHistory;
 
-    public static void main() {
-        Config.load();
+    public Server() {
         try {
-            //Создаем слушатель
-            ServerSocket socketListener = new ServerSocket(Config.PORT);
-            System.out.println("socketListener was created" + socketListener);
-            while (true) {
-                Socket client = null;
-                while (client == null) {
-                    client = socketListener.accept();
-                    Thread.sleep(100);
-                }
-                System.out.println("Socket client = " + client);
-                ClientThread ct = new ClientThread(client); //Создаем новый поток, которому передаем сокет
-                System.out.println("ClientThread = " + ct);
+            final ServerConnection connection = new ServerSocketConnection();
+            usersList = new UsersList();
+            chatHistory = new ChatHistory();
+
+            ScheduledExecutorService listener = Executors.newSingleThreadScheduledExecutor();
+
+            listener.scheduleAtFixedRate(connection::findNewClient, 1, 1, TimeUnit.MILLISECONDS);
+            while (!listener.isShutdown()){
+                Thread.sleep(100);
             }
         } catch (InterruptedException | IOException e) {
-            System.err.println("Exception");
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            System.exit(1);
         }
     }
 
     public synchronized static UsersList getUserList() {
-        return list;
+        return usersList;
     }
 
     public synchronized static ChatHistory getChatHistory() {

@@ -1,6 +1,5 @@
 package com.rbtest.client.connections;
 
-import com.rbtest.client.Connection;
 import com.rbtest.client.config.Config;
 
 import java.io.IOException;
