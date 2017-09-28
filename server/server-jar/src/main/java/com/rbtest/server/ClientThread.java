@@ -1,11 +1,10 @@
 package com.rbtest.server;
 
+import com.rbtest.common.Auth;
 import com.rbtest.common.Message;
 import com.rbtest.common.Ping;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -13,8 +12,8 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 
-import static com.rbtest.server.Server.getChatHistory;
-import static com.rbtest.server.Server.getUserList;
+import static com.rbtest.server.main.Server.getChatHistory;
+import static com.rbtest.server.main.Server.getUserList;
 
 
 /**
@@ -50,12 +49,13 @@ public class ClientThread extends Thread {
             this.login = this.c.getLogin();
 
             //Что же нам прислали?
-            if (!this.c.getMessage().equals(Config.HELLO_MESSAGE)) { //Если это не регистрационное сообщение
-                System.out.println("[" + this.c.getLogin() + "]: " + this.c.getMessage());
-                getChatHistory().addMessage(this.c); //То добавляем его к истории чата
-            } else {
-                outputStream.writeObject(getChatHistory()); //Иначе, отправляем новичку историю чата
+            if (this.c instanceof Auth) {
+                outputStream.writeObject(new Auth());
+                outputStream.writeObject(getChatHistory());
                 this.broadcast(getUserList().getClientsList(), new Message("Server-Bot", "The user " + login + " has been connect")); //И сообщаем всем клиентам, что подключился новый пользователь
+            } else {
+                System.out.println("[" + this.c.getLogin() + "]: " + this.c.getMessage());
+                getChatHistory().addMessage(this.c);
             }
             //Добавляем к списку пользователей - нового
             getUserList().addUser(login, socket, outputStream, inputStream);

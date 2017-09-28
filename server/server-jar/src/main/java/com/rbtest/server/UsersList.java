@@ -1,5 +1,8 @@
 package com.rbtest.server;
 
+import com.rbtest.common.Auth;
+
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -18,6 +21,11 @@ public class UsersList {
 
         if (!this.onlineUsers.containsKey(login)) {
             this.onlineUsers.put(login , new Client(socket, oos, ois));
+            try {
+                onlineUsers.get(login).getThisObjectOutputStream().writeObject(new Auth());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
             int i = 1;
             while(this.onlineUsers.containsKey(login)) {

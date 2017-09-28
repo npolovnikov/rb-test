@@ -1,4 +1,9 @@
-package com.rbtest.server;
+package com.rbtest.server.main;
+
+import com.rbtest.server.ChatHistory;
+import com.rbtest.server.ClientThread;
+import com.rbtest.server.Config;
+import com.rbtest.server.UsersList;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,9 +12,9 @@ import java.net.SocketException;
 
 public class Server {
     private static UsersList list = new UsersList();
-    private static ChatHistory chatHistory = new ChatHistory();
+    private static ChatHistory chatHistory;
 
-    public static void main(String[] args) {
+    public static void main() {
         Config.load();
         try {
             //Создаем слушатель

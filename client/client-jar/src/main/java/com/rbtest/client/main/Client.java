@@ -2,6 +2,7 @@ package com.rbtest.client.main;
 
 import com.rbtest.client.Connection;
 import com.rbtest.client.connections.SocketConnectionImpl;
+import com.rbtest.common.Auth;
 import com.rbtest.common.Message;
 import com.rbtest.common.Ping;
 
@@ -19,21 +20,16 @@ public class Client {
 
     public Client() {
         System.out.println("Вас приветствует клиент чата!");
-        System.out.print("Напишите свой ник: ");
-        final BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         try {
-            userName = keyboard.readLine();
-
             connection = new SocketConnectionImpl();
 
-            final ObjectOutputStream objectOutputStream = connection.getOutputStream();
-            final ObjectInputStream objectInputStream = connection.getInputStream();;
+            auth(connection);
 
             final ScheduledExecutorService reader = Executors.newSingleThreadScheduledExecutor();
-            reader.scheduleWithFixedDelay(() -> reader(objectOutputStream, objectInputStream),1,1, TimeUnit.MILLISECONDS);
+            reader.scheduleWithFixedDelay(() -> reader(connection),1,1, TimeUnit.MILLISECONDS);
 
             final ScheduledExecutorService sender = Executors.newSingleThreadScheduledExecutor();
-            sender.scheduleWithFixedDelay(() -> sender(keyboard, objectOutputStream), 1,1, TimeUnit.MILLISECONDS);
+            sender.scheduleWithFixedDelay(() -> sender(connection), 1,1, TimeUnit.MILLISECONDS);
 
             while (!reader.isShutdown() || !sender.isShutdown()){
                 //Работаем))
@@ -50,12 +46,26 @@ public class Client {
         }
     }
 
-    private void reader(ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream) {
+    private void auth(Connection connection) {
+        final BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         try {
-            final Message messageIn = (Message) objectInputStream.readObject();
+            do {
+                System.out.print("Введите ваше имя: ");
+                userName = keyboard.readLine();
+                new ObjectOutputStream(connection.getOutputStream()).writeObject(new Auth());
+            } while (!((new ObjectInputStream(connection.getInputStream()).readObject()) instanceof Auth));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private void reader(Connection connection) {
+        try {
+            final Message messageIn = (Message) new ObjectInputStream(connection.getInputStream()).readObject();
             if (messageIn != null) {
                 if (messageIn instanceof Ping) {
-                    objectOutputStream.writeObject(new Ping());
+                    new ObjectOutputStream(connection.getOutputStream()).writeObject(new Ping());
                 } else {
                     System.out.println("[ " + messageIn.getTime().toString() + " ] " + messageIn.getLogin() + " : " + messageIn.getMessage());
                 }
@@ -66,10 +76,11 @@ public class Client {
         }
     }
 
-    private void sender(BufferedReader keyboard, ObjectOutputStream objectOutputStream) {
+    private void sender(Connection connection) {
+        final BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         try {
             final String message = keyboard.readLine();
-            objectOutputStream.writeObject(new Message(userName, message));
+            new ObjectOutputStream(connection.getOutputStream()).writeObject(new Message(userName, message));
         } catch (IOException e) {
             System.err.println(e.getMessage());
             System.exit(1);
