@@ -12,5 +12,5 @@ public interface Connection {
 
     ObjectInputStream getInputStream() throws IOException;
 
-    void close() throws IOException;
+    void close();
 }

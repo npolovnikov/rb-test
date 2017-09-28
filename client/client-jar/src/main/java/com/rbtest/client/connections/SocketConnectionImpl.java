@@ -30,8 +30,14 @@ public class SocketConnectionImpl implements Connection {
     }
 
     @Override
-    public void close() throws IOException {
-        socket.close();
+    public void close() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
+
     }
 
 }

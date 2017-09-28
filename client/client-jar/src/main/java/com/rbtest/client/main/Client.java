@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * Created by npolovnikov on 27.09.17.
  */
 public class Client {
-    private static String userName = "";
+    private static String userName;
     private Connection connection;
 
     public Client() {
@@ -35,19 +35,17 @@ public class Client {
             final ScheduledExecutorService sender = Executors.newSingleThreadScheduledExecutor();
             sender.scheduleWithFixedDelay(() -> sender(keyboard, objectOutputStream), 1,1, TimeUnit.MILLISECONDS);
 
-            sender.awaitTermination(10, TimeUnit.DAYS);
-        } catch (Exception e){
+            while (!reader.isShutdown() || !sender.isShutdown()){
+                //Работаем))
+                Thread.sleep(100);
+            }
+        } catch (IOException | InterruptedException e){
             System.err.println(e.getMessage());
             System.exit(1);
         } finally {
-            try {
-                if (connection != null) {
-                    connection.close();
-                    System.out.println("Connection close!");
-                }
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-                System.exit(1);
+            if (connection != null) {
+                connection.close();
+                System.out.println("Connection close!");
             }
         }
     }
