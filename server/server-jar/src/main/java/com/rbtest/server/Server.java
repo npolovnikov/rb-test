@@ -6,13 +6,11 @@ import java.net.Socket;
 import java.net.SocketException;
 
 public class Server {
-    static {
-        Config.load();
-    }
     private static UsersList list = new UsersList();
     private static ChatHistory chatHistory = new ChatHistory();
 
     public static void main(String[] args) {
+        Config.load();
         try {
             //Создаем слушатель
             ServerSocket socketListener = new ServerSocket(Config.PORT);
@@ -27,14 +25,8 @@ public class Server {
                 ClientThread ct = new ClientThread(client); //Создаем новый поток, которому передаем сокет
                 System.out.println("ClientThread = " + ct);
             }
-        } catch (SocketException e) {
-            System.err.println("Socket exception");
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.err.println("I/O exception");
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            System.err.println("Interrupted exception");
+        } catch (InterruptedException | IOException e) {
+            System.err.println("Exception");
             e.printStackTrace();
         }
     }

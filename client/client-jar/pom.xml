@@ -45,7 +45,7 @@
                         <manifest>
                             <classpathPrefix>lib/</classpathPrefix>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.rbtest.client.SocketClient</mainClass>
+                            <mainClass>com.rbtest.client.main.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

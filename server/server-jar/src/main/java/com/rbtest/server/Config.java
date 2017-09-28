@@ -12,6 +12,7 @@ public class Config {
     public static int PORT;
     public static int HISTORY_LENGTH;
     public static String HELLO_MESSAGE;
+
     public static void load(){
         try {
             Properties properties = new Properties();
