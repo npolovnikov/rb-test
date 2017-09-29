@@ -13,19 +13,39 @@ import java.net.Socket;
 public class SocketConnectionImpl implements Connection {
     private Socket socket;
 
-    public SocketConnectionImpl() throws IOException {
-        socket = new Socket(Config.HOST, Config.PORT);
+    public SocketConnectionImpl() {
+        try {
+            socket = new Socket(Config.HOST, Config.PORT);
 //        System.out.println("Start connection to " + socket);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+//            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
     @Override
-    public ObjectOutputStream getOutputStream() throws IOException {
-        return new ObjectOutputStream(socket.getOutputStream());
+    public ObjectOutputStream getOutputStream() {
+        try {
+            return new ObjectOutputStream(socket.getOutputStream());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+//            e.printStackTrace();
+            System.exit(1);
+        }
+        return null;
     }
 
     @Override
-    public ObjectInputStream getInputStream() throws IOException {
-        return new ObjectInputStream(socket.getInputStream());
+    public ObjectInputStream getInputStream() {
+        try {
+            return new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+//            e.printStackTrace();
+            System.exit(1);
+        }
+        return null;
     }
 
     @Override

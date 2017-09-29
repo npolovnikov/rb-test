@@ -1,7 +1,6 @@
 package com.rbtest.client.main;
 
 import com.rbtest.client.connections.Connection;
-import com.rbtest.client.connections.SocketConnectionImpl;
 import com.rbtest.common.Auth;
 import com.rbtest.common.Message;
 import com.rbtest.common.Ping;
@@ -20,12 +19,12 @@ public class Client {
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
 
-    public Client() {
+    public Client(Connection connection) {
         System.out.println("Вас приветствует клиент чата!");
         try {
-            connection = new SocketConnectionImpl();
-            objectOutputStream = connection.getOutputStream();
-            objectInputStream = connection.getInputStream();
+            this.connection = connection;
+            objectOutputStream = this.connection.getOutputStream();
+            objectInputStream = this.connection.getInputStream();
 
             auth();
 
@@ -41,12 +40,12 @@ public class Client {
                 //Работаем))
                 Thread.sleep(100);
             }
-        } catch (IOException | InterruptedException e){
+        } catch (InterruptedException e){
             System.err.println(e.getMessage());
             System.exit(1);
         } finally {
-            if (connection != null) {
-                connection.close();
+            if (this.connection != null) {
+                this.connection.close();
                 System.out.println("Connection close!");
             }
         }
@@ -55,12 +54,14 @@ public class Client {
     private void auth() {
         final BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         try {
+            Auth auth = null;
             do {
                 System.out.print("Введите ваше имя: ");
                 userName = keyboard.readLine();
                 objectOutputStream.writeObject(new Auth(userName));
-            } while (!(objectInputStream.readObject() instanceof Auth));
-            System.out.println("вышел из как хотелось бы из вечного");
+                auth = (Auth) objectInputStream.readObject();
+            } while (!auth.getLogin().equals("Successful"));
+            System.out.println("Вы удачно авторизовались");
         } catch (Exception e) {
             System.err.println(e.getMessage());
             System.exit(1);
@@ -93,4 +94,6 @@ public class Client {
             System.exit(1);
         }
     }
+
+
 }
