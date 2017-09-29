@@ -22,7 +22,7 @@ public class SocketServerConnectionImpl implements ServerConnection {
         } catch (IOException e) {
             System.err.println(e.getMessage());
 //            e.printStackTrace();
-            System.exit(1);
+//            System.exit(1);
         }
     }
 
@@ -34,7 +34,7 @@ public class SocketServerConnectionImpl implements ServerConnection {
         } catch (IOException e) {
             System.err.println(e.getMessage());
 //            e.printStackTrace();
-            System.exit(1);
+//            System.exit(1);
         }
     }
 
@@ -51,7 +51,7 @@ public class SocketServerConnectionImpl implements ServerConnection {
         } catch (IOException e){
             System.err.println(e.getMessage());
 //            e.printStackTrace();
-            System.exit(1);
+//            System.exit(1);
         }
         return null;
     }

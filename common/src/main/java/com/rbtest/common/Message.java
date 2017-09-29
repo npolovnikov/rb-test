@@ -11,18 +11,10 @@ public class Message implements Serializable {
 
     private String login;
     private Date time;
-    private String[] address;
     private String message;
 
     public Message(String login, String message) {
         this.login = login;
-        this.message = message;
-        this.time = new Date();
-    }
-
-    public Message(String login, String[] address, String message) {
-        this.login = login;
-        this.address = address;
         this.message = message;
         this.time = new Date();
     }
@@ -41,14 +33,6 @@ public class Message implements Serializable {
 
     public void setTime(Date time) {
         this.time = time;
-    }
-
-    public String[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(String[] address) {
-        this.address = address;
     }
 
     public String getMessage() {
