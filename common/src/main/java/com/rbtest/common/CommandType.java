@@ -5,7 +5,7 @@ package com.rbtest.common;
  */
 public enum CommandType {
     userList("--user", "Получить список пользователей"),
-    help("--help", "Справкка");
+    help("--help", "Справка о командах");
 
     String name;
     String deskr;
@@ -21,5 +21,12 @@ public enum CommandType {
 
     public String getDeskr() {
         return deskr;
+    }
+
+    @Override
+    public String toString() {
+        return "Команда '" + name + '\'' +
+                " = '" + deskr + '\'' +
+                '\n';
     }
 }
