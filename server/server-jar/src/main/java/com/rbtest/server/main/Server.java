@@ -20,20 +20,17 @@ import java.util.concurrent.TimeUnit;
 
 public class Server {
 
-    private List<Message> chatHistory;
-    private HashMap<String, Client> clients;
+    private final List<Message> chatHistory  = new ArrayList<>(Config.HISTORY_LENGTH);;
+    private final HashMap<String, Client> clients = new HashMap<>();
 
     public Server(ServerConnection serverConnection) {
-        clients = new HashMap<>();
-        chatHistory = new ArrayList<>(Config.HISTORY_LENGTH);
-
         final ScheduledExecutorService finder = Executors.newSingleThreadScheduledExecutor();
         finder.scheduleAtFixedRate(() -> {
             Client client = null;
             while (client == null) {
                 client = serverConnection.getClient();
             }
-            System.out.println("Founded new client " + client);
+//            System.out.println("Founded new client " + client);
             final ExecutorService clientThread = Executors.newSingleThreadExecutor();
             Client finalClient = client;
             clientThread.execute(() -> workingClient(finalClient));
@@ -41,14 +38,14 @@ public class Server {
     }
 
     private void workingClient(final Client client) {
-        System.out.println("start working with client " + client);
+//        System.out.println("start working with client " + client);
 
         final ScheduledExecutorService reader = Executors.newSingleThreadScheduledExecutor();
         reader.scheduleAtFixedRate(() -> {
             try {
                 readMessage(client);
             } catch (IOException | ClassNotFoundException e) {
-                clients.remove(client.getClientLogin());
+                getClients().remove(client.getClientLogin());
                 System.err.println(e.getMessage());
                 try {
                     broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
@@ -65,7 +62,7 @@ public class Server {
         int in = client.getPingIn();
 
         if (out > in){
-            clients.remove(client.getClientLogin());
+            getClients().remove(client.getClientLogin());
             broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
         } else {
             sendMessage(client, new Ping());
@@ -75,15 +72,15 @@ public class Server {
     }
 
     private void readMessage(final Client client) throws IOException, ClassNotFoundException {
-            Message msg = (Message) client.getInputStream().readObject();
-            System.out.println("new Message " + msg);
-            if (msg instanceof Auth) {
+        Message msg = (Message) client.getInputStream().readObject();
+        System.out.println("[ " + msg.getTime().toString() + " ] " + msg.getLogin() + " : " + msg.getMessage());
+        if (msg instanceof Auth) {
                 registerClient(client, (Auth) msg);
-                chatHistory.forEach(message -> {
+                getHistory().forEach(message -> {
                     try {
                         sendMessage(client, message);
                     } catch (IOException e) {
-                        clients.remove(client.getClientLogin());
+                        getClients().remove(client.getClientLogin());
                         System.err.println(e.getMessage());
                         try {
                             broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
@@ -97,7 +94,7 @@ public class Server {
                 if (msg.getMessage().equals(CommandType.help.getName())){
                     sendMessage(client, new Message("SYSTEM", Arrays.toString(CommandType.values())));
                 } else if(msg.getMessage().equals(CommandType.userList.getName())) {
-                    sendMessage(client, new Message("SYSTEM", clients.keySet().toString()));
+                    sendMessage(client, new Message("SYSTEM", getClients().keySet().toString()));
                 } else {
                     broadcast(msg);
                 }
@@ -106,17 +103,17 @@ public class Server {
 
     private void broadcast(Message msg) throws IOException {
         addMessageToHistory(msg);
-        for (Client client: clients.values()){
+        for (Client client: getClients().values()){
             sendMessage(client, msg);
         }
     }
 
     private void addMessageToHistory(Message msg) {
-        if (chatHistory.size() > Config.HISTORY_LENGTH){
-            chatHistory.remove(0);
+        if (getHistory().size() >= Config.HISTORY_LENGTH){
+            getHistory().remove(0);
         }
 
-        chatHistory.add(msg);
+        getHistory().add(msg);
     }
 
     private void sendMessage(final Client client, Message message) throws IOException {
@@ -124,8 +121,8 @@ public class Server {
     }
 
     private void registerClient(Client client, Auth msg) throws IOException {
-        if (!clients.containsKey(msg.getLogin())) {
-            clients.put(msg.getLogin(), client);
+        if (!getClients().containsKey(msg.getLogin())) {
+            getClients().put(msg.getLogin(), client);
             client.setClientLogin(msg.getLogin());
             sendMessage(client, new Auth("Successful"));
 
@@ -140,6 +137,18 @@ public class Server {
             },1, 10, TimeUnit.SECONDS);
         } else {
             sendMessage(client, new Auth("Error"));
+        }
+    }
+
+    public List<Message> getHistory(){
+        synchronized (chatHistory) {
+            return chatHistory;
+        }
+    }
+
+    public HashMap<String, Client> getClients(){
+        synchronized (clients) {
+            return clients;
         }
     }
 }

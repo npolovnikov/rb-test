@@ -43,10 +43,6 @@ public class SocketServerConnectionImpl implements ServerConnection {
         try {
             final Socket socket = serverSocket.accept();
             System.out.println(socket);
-            if (socket != null){
-                System.out.println(socket.getInputStream());
-                System.out.println(socket.getOutputStream());
-            }
             return socket == null ? null : new SocketClientImpl(new ObjectOutputStream(socket.getOutputStream()), new ObjectInputStream(socket.getInputStream()));
         } catch (IOException e){
             System.err.println(e.getMessage());
