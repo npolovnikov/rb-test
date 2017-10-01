@@ -54,12 +54,12 @@ public class ServerTest {
             });
         }
         clientExec.shutdown();
-        clientExec.awaitTermination(120, TimeUnit.SECONDS);
+        clientExec.awaitTermination(60, TimeUnit.SECONDS);
 
 
-        for (Message msg : server.getHistory()) {
-            System.out.println("[" + msg.getTime() + "]" + msg.getLogin() + ":" + msg.getMessage());
-        }
+//        for (Message msg : server.getHistory()) {
+//            System.out.println("[" + msg.getTime() + "]" + msg.getLogin() + ":" + msg.getMessage());
+//        }
 
         Assert.assertEquals(server.getHistory().size(), Config.HISTORY_LENGTH);
     }
