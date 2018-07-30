@@ -14,6 +14,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static com.rbtest.common.Consts.SYSTEM_USER;
+
 public class Server {
 
     private final List<Message> chatHistory  = new ArrayList<>(Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100")));
@@ -32,7 +34,7 @@ public class Server {
             }
             System.out.println("Founded new client " + client);
             final ExecutorService clientThread = Executors.newSingleThreadExecutor();
-            Client finalClient = client;
+            final Client finalClient = client;
             clientThread.execute(() -> workingClient(finalClient));
         },1, 1, TimeUnit.MILLISECONDS);
     }
@@ -48,7 +50,7 @@ public class Server {
                 getClients().remove(client.getClientLogin());
                 System.err.println(client.getClientLogin() + " : " + e.getMessage());
                 try {
-                    broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
+                    broadcast(new Message(SYSTEM_USER, "Пользовотель: " + client.getClientLogin() + " отключился"));
                 } catch (IOException e1) {
                     reader.shutdown();
                 }
@@ -63,7 +65,7 @@ public class Server {
 
         if (out > in){
             getClients().remove(client.getClientLogin());
-            broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
+            broadcast(new Message(SYSTEM_USER, "Пользовотель: " + client.getClientLogin() + " отключился"));
         } else {
             sendMessage(client, new Ping());
             client.addPingOut();
@@ -83,20 +85,21 @@ public class Server {
                             getClients().remove(client.getClientLogin());
                             System.err.println(client.getClientLogin() + " : " + e.getMessage());
                             try {
-                                broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
+                                broadcast(new Message(SYSTEM_USER, "Пользовотель: " + client.getClientLogin() + " отключился"));
                             } catch (IOException ignored) {
                             }
                         }
                     });
-                    broadcast(new Message("SYSTEM", "Поприветствуйте нового пользователя: " + msg.getLogin() + "!"));
+                    sendMessage(client, new Message(SYSTEM_USER, Config.getProperty(Config.HELLO_MESSAGE)));
+                    broadcast(new Message(SYSTEM_USER, "Поприветствуйте нового пользователя: " + msg.getLogin() + "!"));
                 }
             } else if (msg instanceof Ping) {
                 client.addPingIn();
             } else {
                 if (msg.getMessage().equals(CommandType.help.getName())){
-                    sendMessage(client, new Message("SYSTEM", Arrays.toString(CommandType.values())));
+                    sendMessage(client, new Message(SYSTEM_USER, Arrays.toString(CommandType.values())));
                 } else if(msg.getMessage().equals(CommandType.userList.getName())) {
-                    sendMessage(client, new Message("SYSTEM", getClients().keySet().toString()));
+                    sendMessage(client, new Message(SYSTEM_USER, getClients().keySet().toString()));
                 } else {
                     broadcast(msg);
                 }

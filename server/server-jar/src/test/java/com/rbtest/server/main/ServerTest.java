@@ -42,7 +42,7 @@ public class ServerTest {
                     for (int j = 0; j < 10; j++) {
                         oos.writeObject(new Message(login, "Message" + j));
 //                        System.out.println("[TEST] " + login + " send message");
-                        Thread.sleep(500 * new Random().nextInt(5));
+                        Thread.sleep(100 * new Random().nextInt(5));
                     }
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();

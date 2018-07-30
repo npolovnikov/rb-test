@@ -1,7 +1,5 @@
 package com.rbtest.common;
 
-import com.sun.istack.internal.NotNull;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,18 +12,18 @@ public class Config {
     public static String PORT = "PORT";
     public static String HOST = "HOST";
     public static String HISTORY_LENGTH = "HISTORY_LENGTH";
-    public static String HELLO_MESSAGE = "HELLO_MESSAGE";
+    public static String HELLO_MESSAGE = "Hello!";
 
     private final static Properties CONFIG = new Properties();
 
-    public static String getProperty(@NotNull String key, String defaultValue) {
+    public static String getProperty(String key, String defaultValue) {
         if (CONFIG.isEmpty()) {
             load();
         }
         return CONFIG.getProperty(key, defaultValue);
     }
 
-    public static String getProperty(@NotNull String key) {
+    public static String getProperty(String key) {
         if (CONFIG.isEmpty()) {
             load();
         }
