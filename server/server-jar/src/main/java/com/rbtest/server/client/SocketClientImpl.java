@@ -59,4 +59,11 @@ public class SocketClientImpl implements Client {
     public void setClientLogin(String login) {
         this.login = login;
     }
+
+    @Override
+    public String toString() {
+        return "SocketClientImpl{" +
+                "login='" + login + '\'' +
+                '}';
+    }
 }

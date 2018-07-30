@@ -27,7 +27,7 @@ public class Server {
                 try {
                     client = serverConnection.getNextClient();
                 } catch (IOException e) {
-                    System.out.println(e.getClass().getName() + ":" + e.getMessage());
+                    System.err.println(e.getClass().getName() + ":" + e.getMessage());
                 }
             }
             System.out.println("Founded new client " + client);
@@ -46,7 +46,7 @@ public class Server {
                 readMessage(client);
             } catch (IOException | ClassNotFoundException e) {
                 getClients().remove(client.getClientLogin());
-                System.err.println(e.getMessage());
+                System.err.println(client.getClientLogin() + " : " + e.getMessage());
                 try {
                     broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
                 } catch (IOException e1) {
@@ -81,7 +81,7 @@ public class Server {
                             sendMessage(client, message);
                         } catch (IOException e) {
                             getClients().remove(client.getClientLogin());
-                            System.err.println(e.getMessage());
+                            System.err.println(client.getClientLogin() + " : " + e.getMessage());
                             try {
                                 broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
                             } catch (IOException ignored) {

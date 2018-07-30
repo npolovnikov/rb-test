@@ -4,6 +4,7 @@ import com.rbtest.common.Auth;
 import com.rbtest.common.Config;
 import com.rbtest.common.Message;
 import com.rbtest.server.connections.SocketServerConnectionImpl;
+import javafx.util.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -27,23 +28,32 @@ public class ServerTest {
         final Server server = new Server(new SocketServerConnectionImpl());
         Thread.sleep(100);
         final AtomicInteger countOfExec = new AtomicInteger();
-        final ExecutorService clientExec = Executors.newFixedThreadPool(100);
+        final ExecutorService clientExec = Executors.newFixedThreadPool(4);
         for (int i = 0; i < 100; i++) {
             clientExec.submit(() -> {
+                ObjectOutputStream oos = null;
                 try {
                     final String login = "login" + countOfExec.getAndIncrement();
                     final Socket client = new Socket(Config.getProperty(Config.HOST, "127.0.0.1"),
                             Integer.parseInt(Config.getProperty(Config.PORT, "1111")));
-                    final ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+                    oos = new ObjectOutputStream(client.getOutputStream());
                     oos.writeObject(new Auth(login));
 //                    System.out.println("[TEST] " + login + " send AUTH message");
                     for (int j = 0; j < 10; j++) {
                         oos.writeObject(new Message(login, "Message" + j));
 //                        System.out.println("[TEST] " + login + " send message");
-                        Thread.sleep(100 * new Random().nextInt(5));
+                        Thread.sleep(500 * new Random().nextInt(5));
                     }
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
+                } finally {
+                    if (oos != null) {
+                        try {
+                            oos.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             });
         }

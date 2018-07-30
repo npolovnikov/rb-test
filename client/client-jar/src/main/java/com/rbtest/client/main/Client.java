@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * Created by npolovnikov on 27.09.17.
  */
 public class Client {
-    private static String userName;
+    private String userName;
     private Connection connection;
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
@@ -41,12 +41,12 @@ public class Client {
                 Thread.sleep(100);
             }
         } catch (InterruptedException e){
-            System.err.println(e.getMessage());
+            System.err.println(userName + e.getMessage());
             System.exit(1);
         } finally {
             if (this.connection != null) {
                 this.connection.close();
-                System.out.println("Connection close!");
+                System.out.println(userName + "Connection close!");
             }
         }
     }
@@ -63,7 +63,7 @@ public class Client {
             } while (!auth.getLogin().equals(Auth.Status.SUCCESS));
             System.out.println("Вы удачно авторизовались");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println(userName + e.getMessage());
             System.exit(1);
         }
     }
@@ -79,7 +79,7 @@ public class Client {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.err.println(e.getMessage());
+            System.err.println(userName + e.getMessage());
             System.exit(1);
         }
     }
@@ -90,10 +90,8 @@ public class Client {
             final String message = keyboard.readLine();
             objectOutputStream.writeObject(new Message(userName, message));
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            System.err.println(userName + e.getMessage());
             System.exit(1);
         }
     }
-
-
 }

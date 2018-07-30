@@ -12,7 +12,7 @@ public class Main {
         try {
             new Server(new SocketServerConnectionImpl());
         } catch (IOException e) {
-            System.out.println(e.getClass().getName() + ":" + e.getMessage());
+            System.err.println(e.getClass().getName() + ":" + e.getMessage());
             System.exit(1);
         }
     }
