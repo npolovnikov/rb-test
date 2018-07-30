@@ -8,9 +8,9 @@ import java.io.ObjectOutputStream;
  * Created by npolovnikov on 28.09.17.
  */
 public interface Connection {
-    ObjectOutputStream getOutputStream();
+    ObjectOutputStream getOutputStream() throws IOException;
 
-    ObjectInputStream getInputStream();
+    ObjectInputStream getInputStream() throws IOException;
 
-    void close();
+    void close() throws IOException;
 }

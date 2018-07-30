@@ -1,8 +1,8 @@
 package com.rbtest.server.connections;
 
+import com.rbtest.common.Config;
 import com.rbtest.server.client.Client;
 import com.rbtest.server.client.SocketClientImpl;
-import com.rbtest.server.config.Config;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,39 +16,19 @@ import java.net.Socket;
 public class SocketServerConnectionImpl implements ServerConnection {
     private ServerSocket serverSocket;
 
-    public SocketServerConnectionImpl() {
-        try {
-            serverSocket = new ServerSocket(Config.PORT);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-//            e.printStackTrace();
-//            System.exit(1);
-        }
-    }
-
-
-    @Override
-    public void close() {
-        try {
-            serverSocket.close();
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-//            e.printStackTrace();
-//            System.exit(1);
-        }
+    public SocketServerConnectionImpl() throws IOException {
+        serverSocket = new ServerSocket(Integer.parseInt(Config.getProperty(Config.PORT, "1111")));
     }
 
     @Override
-    public Client getClient() {
-        try {
-            final Socket socket = serverSocket.accept();
-            System.out.println(socket);
-            return socket == null ? null : new SocketClientImpl(new ObjectOutputStream(socket.getOutputStream()), new ObjectInputStream(socket.getInputStream()));
-        } catch (IOException e){
-            System.err.println(e.getMessage());
-//            e.printStackTrace();
-//            System.exit(1);
-        }
-        return null;
+    public void close() throws IOException {
+        serverSocket.close();
+    }
+
+    @Override
+    public Client getNextClient() throws IOException {
+        final Socket socket = serverSocket.accept();
+        System.out.println(socket);
+        return socket == null ? null : new SocketClientImpl(new ObjectOutputStream(socket.getOutputStream()), new ObjectInputStream(socket.getInputStream()));
     }
 }

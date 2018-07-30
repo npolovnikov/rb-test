@@ -19,7 +19,7 @@ public class Client {
     private ObjectOutputStream objectOutputStream;
     private ObjectInputStream objectInputStream;
 
-    public Client(Connection connection) {
+    public Client(Connection connection) throws IOException {
         System.out.println("Вас приветствует клиент чата!");
         try {
             this.connection = connection;
@@ -54,13 +54,13 @@ public class Client {
     private void auth() {
         final BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         try {
-            Auth auth = null;
+            Auth auth;
             do {
                 System.out.print("Введите ваше имя: ");
                 userName = keyboard.readLine();
                 objectOutputStream.writeObject(new Auth(userName));
                 auth = (Auth) objectInputStream.readObject();
-            } while (!auth.getLogin().equals("Successful"));
+            } while (!auth.getLogin().equals(Auth.Status.SUCCESS));
             System.out.println("Вы удачно авторизовались");
         } catch (Exception e) {
             System.err.println(e.getMessage());

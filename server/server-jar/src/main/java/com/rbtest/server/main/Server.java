@@ -1,11 +1,7 @@
 package com.rbtest.server.main;
 
-import com.rbtest.common.Auth;
-import com.rbtest.common.CommandType;
-import com.rbtest.common.Message;
-import com.rbtest.common.Ping;
+import com.rbtest.common.*;
 import com.rbtest.server.client.Client;
-import com.rbtest.server.config.Config;
 import com.rbtest.server.connections.ServerConnection;
 
 import java.io.IOException;
@@ -20,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Server {
 
-    private final List<Message> chatHistory  = new ArrayList<>(Config.HISTORY_LENGTH);;
+    private final List<Message> chatHistory  = new ArrayList<>(Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100")));
     private final HashMap<String, Client> clients = new HashMap<>();
 
     public Server(ServerConnection serverConnection) {
@@ -28,9 +24,13 @@ public class Server {
         finder.scheduleAtFixedRate(() -> {
             Client client = null;
             while (client == null) {
-                client = serverConnection.getClient();
+                try {
+                    client = serverConnection.getNextClient();
+                } catch (IOException e) {
+                    System.out.println(e.getClass().getName() + ":" + e.getMessage());
+                }
             }
-//            System.out.println("Founded new client " + client);
+            System.out.println("Founded new client " + client);
             final ExecutorService clientThread = Executors.newSingleThreadExecutor();
             Client finalClient = client;
             clientThread.execute(() -> workingClient(finalClient));
@@ -38,7 +38,7 @@ public class Server {
     }
 
     private void workingClient(final Client client) {
-//        System.out.println("start working with client " + client);
+        System.out.println("start working with client " + client);
 
         final ScheduledExecutorService reader = Executors.newSingleThreadScheduledExecutor();
         reader.scheduleAtFixedRate(() -> {
@@ -75,19 +75,21 @@ public class Server {
         Message msg = (Message) client.getInputStream().readObject();
         System.out.println("[ " + msg.getTime().toString() + " ] " + msg.getLogin() + " : " + msg.getMessage());
         if (msg instanceof Auth) {
-                registerClient(client, (Auth) msg);
-                getHistory().forEach(message -> {
-                    try {
-                        sendMessage(client, message);
-                    } catch (IOException e) {
-                        getClients().remove(client.getClientLogin());
-                        System.err.println(e.getMessage());
+                if (registerClient(client, (Auth) msg)) {
+                    getHistory().forEach(message -> {
                         try {
-                            broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
-                        } catch (IOException ignored) {}
-                    }
-                });
-                broadcast(new Message("SYSTEM", "Поприветствуйте нового пользователя: " + msg.getLogin() + "!"));
+                            sendMessage(client, message);
+                        } catch (IOException e) {
+                            getClients().remove(client.getClientLogin());
+                            System.err.println(e.getMessage());
+                            try {
+                                broadcast(new Message("SYSTEM", "Пользовотель: " + client.getClientLogin() + " отключился"));
+                            } catch (IOException ignored) {
+                            }
+                        }
+                    });
+                    broadcast(new Message("SYSTEM", "Поприветствуйте нового пользователя: " + msg.getLogin() + "!"));
+                }
             } else if (msg instanceof Ping) {
                 client.addPingIn();
             } else {
@@ -109,7 +111,7 @@ public class Server {
     }
 
     private void addMessageToHistory(Message msg) {
-        if (getHistory().size() >= Config.HISTORY_LENGTH){
+        if (getHistory().size() >= Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100"))) {
             getHistory().remove(0);
         }
 
@@ -120,11 +122,11 @@ public class Server {
         client.getOutputStream().writeObject(message);
     }
 
-    private void registerClient(Client client, Auth msg) throws IOException {
+    private boolean registerClient(Client client, Auth msg) throws IOException {
         if (!getClients().containsKey(msg.getLogin())) {
             getClients().put(msg.getLogin(), client);
             client.setClientLogin(msg.getLogin());
-            sendMessage(client, new Auth("Successful"));
+            sendMessage(client, new Auth(Auth.Status.SUCCESS));
 
             //Начинаем пинговать
             final ScheduledExecutorService pinger = Executors.newSingleThreadScheduledExecutor();
@@ -135,8 +137,10 @@ public class Server {
                     pinger.shutdown();
                 }
             },1, 10, TimeUnit.SECONDS);
+            return true;
         } else {
-            sendMessage(client, new Auth("Error"));
+            sendMessage(client, new Auth(Auth.Status.ERROR));
+            return false;
         }
     }
 
