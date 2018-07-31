@@ -4,6 +4,8 @@ import com.rbtest.common.*;
 import com.rbtest.server.client.Client;
 import com.rbtest.server.client.WorkingClient;
 import com.rbtest.server.connections.ServerConnection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
-
+    private final static Logger LOG = LoggerFactory.getLogger(Server.class);
     private final List<Message> chatHistory  = new ArrayList<>(Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100")));
     private final HashMap<String, Client> clients = new HashMap<>();
     private final ServerConnection serverConnection;
@@ -29,7 +31,7 @@ public class Server {
                     client = serverConnection.getNextClient();
                     new WorkingClient(client, this);
                 } catch (IOException e) {
-                    System.err.println(e.getClass().getName() + ":" + e.getMessage());
+                    LOG.error("{} : {}", e.getClass().getName() + ":" + e.getMessage(), e);
                 }
             }
         },1, 1, TimeUnit.MILLISECONDS);
