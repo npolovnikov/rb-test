@@ -6,7 +6,7 @@ package com.rbtest.common;
 public class Ping extends Message {
     private static final long serialVersionUID = 2660138438202931003L;
 
-    public Ping() {
-        super("Ping", "Ping");
+    public Ping(String login) {
+        super(login, "Ping");
     }
 }

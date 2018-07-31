@@ -42,4 +42,8 @@ public class Message implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public String parseMessage(){
+        return String.format("[%s] %s: %s", getTime().toString(), getLogin(), getMessage());
+    }
 }

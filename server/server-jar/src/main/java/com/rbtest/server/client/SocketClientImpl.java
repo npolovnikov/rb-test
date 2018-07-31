@@ -8,15 +8,17 @@ import java.io.ObjectOutputStream;
  */
 public class SocketClientImpl implements Client {
 
+    private String ipAddr;
     private String login;
     private int pingIn;
     private int pingOut;
     private ObjectInputStream objectInputStream;
     private ObjectOutputStream objectOutputStream;
 
-    public SocketClientImpl(ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream) {
+    public SocketClientImpl(ObjectOutputStream objectOutputStream, ObjectInputStream objectInputStream, String ipAddr) {
         this.objectOutputStream = objectOutputStream;
         this.objectInputStream = objectInputStream;
+        this.ipAddr = ipAddr;
 
     }
 
@@ -63,7 +65,8 @@ public class SocketClientImpl implements Client {
     @Override
     public String toString() {
         return "SocketClientImpl{" +
-                "login='" + login + '\'' +
+                "ipAddr='" + ipAddr + '\'' +
+                ", login='" + login + '\'' +
                 '}';
     }
 }

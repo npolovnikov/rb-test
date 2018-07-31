@@ -74,13 +74,14 @@ public class Client {
             final Message messageIn = (Message) objectInputStream.readObject();
             if (messageIn != null) {
                 if (messageIn instanceof Ping) {
-                    objectOutputStream.writeObject(new Ping());
+                    objectOutputStream.writeObject(new Ping(userName));
                 } else {
-                    System.out.printf("[%s] %s: %s\n", messageIn.getTime().toString(), messageIn.getLogin(), messageIn.getMessage());
+                    System.out.println(messageIn.parseMessage());
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             LOG.error("{} : {}", e.getClass().getName(), e.getMessage(), e);
+            System.exit(1);
         }
     }
 
@@ -90,6 +91,7 @@ public class Client {
             objectOutputStream.writeObject(new Message(userName, message));
         } catch (IOException e) {
             LOG.error("{} : {}", e.getClass().getName(), e.getMessage(), e);
+            System.exit(1);
         }
     }
 }
