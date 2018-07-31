@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ServerTest {
 
-    @Test
+    @Test(enabled = false)
     public void serverTest() throws IOException, InterruptedException {
         final Server server = new Server(new SocketServerConnectionImpl());
         Thread.sleep(100);
