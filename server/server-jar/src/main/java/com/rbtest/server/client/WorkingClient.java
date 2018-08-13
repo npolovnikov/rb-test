@@ -1,6 +1,7 @@
 package com.rbtest.server.client;
 
 import com.rbtest.common.*;
+import com.rbtest.server.UserNameAlreadyExistException;
 import com.rbtest.server.main.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,8 @@ public class WorkingClient {
                     server.sendMessage(client, createSystemMessage(Arrays.toString(CommandType.values())));
                 } else if (msg.getMessage().equals(CommandType.userList.getName())) {
                     server.sendMessage(client, createSystemMessage(server.getClients().keySet().toString()));
+                } else if(!client.getClientLogin().equals(msg.getLogin())) {
+                    server.sendMessage(client, createSystemMessage("Ошибка: ожидаемый логин отличен от заявленого в сообщении"));
                 } else {
                     server.broadcast(msg);
                 }
@@ -70,8 +73,8 @@ public class WorkingClient {
     }
 
     private boolean registerClient(Auth msg) throws IOException {
-        if (!server.getClients().containsKey(msg.getLogin())) {
-            server.getClients().put(msg.getLogin(), client);
+        try {
+            server.addClient(msg.getLogin(), client);
             client.setClientLogin(msg.getLogin());
             server.sendMessage(client, new Auth(Auth.Status.SUCCESS));
 
@@ -79,7 +82,7 @@ public class WorkingClient {
             pinger = Executors.newSingleThreadScheduledExecutor();
             pinger.scheduleAtFixedRate(this::sendPing,1, 10, TimeUnit.SECONDS);
             return true;
-        } else {
+        } catch (UserNameAlreadyExistException e) {
             server.sendMessage(client, new Auth(Auth.Status.ERROR));
             return false;
         }
@@ -116,7 +119,7 @@ public class WorkingClient {
                 }
 
                 LOG.debug("Пользовотель: {} отключился", client.getClientLogin());
-                server.getClients().remove(client.getClientLogin());
+                server.removeClient(client.getClientLogin());
                 server.broadcast(createSystemMessage("Пользовотель: " + client.getClientLogin() + " отключился"));
             }
         } catch (IOException e) {

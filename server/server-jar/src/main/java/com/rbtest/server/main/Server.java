@@ -1,6 +1,7 @@
 package com.rbtest.server.main;
 
 import com.rbtest.common.*;
+import com.rbtest.server.UserNameAlreadyExistException;
 import com.rbtest.server.client.Client;
 import com.rbtest.server.client.WorkingClient;
 import com.rbtest.server.connections.ServerConnection;
@@ -14,12 +15,16 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Server {
     private final static Logger LOG = LoggerFactory.getLogger(Server.class);
     private final List<Message> chatHistory  = new ArrayList<>(Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100")));
     private final HashMap<String, Client> clients = new HashMap<>();
     private final ServerConnection serverConnection;
+    private final ReadWriteLock clientsLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock historyLock = new ReentrantReadWriteLock();
 
     public Server(ServerConnection serverConnection) {
         this.serverConnection = serverConnection;
@@ -40,10 +45,10 @@ public class Server {
 
     public void addMessageToHistory(Message msg) {
         if (getHistory().size() >= Integer.parseInt(Config.getProperty(Config.HISTORY_LENGTH, "100"))) {
-            getHistory().remove(0);
+            removeFirstHistory();
         }
 
-        getHistory().add(msg);
+        addHistory(msg);
     }
 
 
@@ -58,17 +63,68 @@ public class Server {
         client.getOutputStream().writeObject(message);
     }
 
-    public List<Message> getHistory(){
-        synchronized (chatHistory) {
+    public List<Message> getHistory() {
+        historyLock.readLock().lock();
+        try {
             return chatHistory;
+        } finally {
+            historyLock.readLock().unlock();
+        }
+    }
+
+    public void addHistory(Message message) {
+        historyLock.writeLock().lock();
+        try {
+            chatHistory.add(message);
+        } finally {
+            historyLock.writeLock().unlock();
+        }
+    }
+
+    public void removeFirstHistory() {
+        historyLock.writeLock().lock();
+        try {
+            chatHistory.remove(0);
+        } finally {
+            historyLock.writeLock().unlock();
         }
     }
 
     public HashMap<String, Client> getClients(){
-        synchronized (clients) {
+        clientsLock.readLock().lock();
+        try {
             return clients;
+        } finally {
+            clientsLock.readLock().unlock();
         }
     }
+
+    public void addClient(String login, Client client) throws UserNameAlreadyExistException {
+        if (clients.containsKey(login)) {
+            throw new UserNameAlreadyExistException(login);
+        } else {
+            clientsLock.writeLock().lock();
+            try {
+                if (clients.containsKey(login)) {
+                    throw new UserNameAlreadyExistException(login);
+                } else {
+                    clients.put(login, client);
+                }
+            } finally {
+                clientsLock.writeLock().unlock();
+            }
+        }
+    }
+
+    public void removeClient(String login) {
+        clientsLock.writeLock().lock();
+        try {
+            clients.remove(login);
+        } finally {
+            clientsLock.writeLock().unlock();
+        }
+    }
+
 
     @Override
     public String toString() {
