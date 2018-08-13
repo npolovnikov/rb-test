@@ -111,12 +111,8 @@ public class WorkingClient {
             if (work) {
                 work = false;
 
-                if (reader.isShutdown()) {
-                    reader.shutdownNow();
-                }
-                if (pinger.isShutdown()) {
-                    pinger.shutdownNow();
-                }
+                reader.shutdownNow();
+                pinger.shutdownNow();
 
                 LOG.debug("Пользовотель: {} отключился", client.getClientLogin());
                 server.removeClient(client.getClientLogin());
